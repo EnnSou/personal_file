@@ -5,12 +5,12 @@ import numpy as np
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, scale):
         super(ScaledDotProductAttention, self).__init__()
-        self.scale = scale
+        self.scale = np.power(scale, 0.5)
         self.softmax = nn.Softmax(dim=2)
 
     def forward(self, q, k, v, mask=None):
         u = torch.bmm(q, k.transpose(1, 2))
-        u = u / np.power(self.scale, 0.5)
+        u = u / self.scale
 
         if mask is not None:
             u = u.masked_fill(mask, -np.inf)
