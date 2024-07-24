@@ -1,3 +1,6 @@
+import torch
+import os
+
 # ----- 定义 onnx 算子关系 -----
 # 单输入单输出算子
 def fbgemm_asynchronous_complete_cumsum_custom(g, input):
