@@ -77,12 +77,25 @@ graph.output[3].type.tensor_type.shape.dim[2].dim_value = 88
 graph.output[3].type.tensor_type.shape.dim[3].dim_value = 168
 
 ### 添加指定节点为模型 output
-graph.output.extend([onnx.ValueInfoProto(name='1')])
+inter_layers = ['cxr_model/concat:0']
+value_info_protos = []
+shape_info = onnx.shape_inference.infer_shapes(model_onnx)
+for idx, node in enumerate(shape_info.graph.value_info):
+    if node.name in inter_layers:
+        value_info_protos.append(node)
+graph.output.extend(value_info_protos) 
 
 ### 整个模型node添加到输出
+inter_layers = []
 for node in graph.node:
     for output in node.output:
-        graph.output.extend([onnx.ValueInfoProto(name=output)])
+        inter_layers.append(output)
+        
+value_info_protos = []
+shape_info = onnx.shape_inference.infer_shapes(model_onnx)
+for idx, node in enumerate(shape_info.graph.value_info):
+    value_info_protos.append(node)
+graph.output.extend(value_info_protos) 
 
 ## 生成新模型，完成shape检查
 new_graph = onnx.helper.make_graph(graph.node, graph.name, graph.input, graph.output, graph.initializer)
