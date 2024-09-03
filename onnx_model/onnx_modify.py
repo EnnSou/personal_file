@@ -1,6 +1,10 @@
 import onnx
 from onnx import helper
 
+'''
+整理记录常用 onnx 模型修改方法，整个脚本不一定能直接运行，需要根据具体模型修改。
+'''
+
 ## 加载模型
 model_path = "/home/zheng/Downloads/yepan/c3_od_gen2.onnx"
 model_onnx = onnx.load(model_path)
@@ -13,6 +17,7 @@ node = graph.node
 input = graph.input[0]
 graph.input[0].type.tensor_type.shape.dim[2].dim_value = 540
 new_input = graph.input[0]
+
 
 
 ### 在模型头部增加slice算子
@@ -70,6 +75,14 @@ graph.node.insert(insert_node_index + 1, resize_node)
 ### 修改模型output 信息
 graph.output[3].type.tensor_type.shape.dim[2].dim_value = 88
 graph.output[3].type.tensor_type.shape.dim[3].dim_value = 168
+
+### 添加指定节点为模型 output
+graph.output.extend([onnx.ValueInfoProto(name='1')])
+
+### 整个模型node添加到输出
+for node in graph.node:
+    for output in node.output:
+        graph.output.extend([onnx.ValueInfoProto(name=output)])
 
 ## 生成新模型，完成shape检查
 new_graph = onnx.helper.make_graph(graph.node, graph.name, graph.input, graph.output, graph.initializer)
