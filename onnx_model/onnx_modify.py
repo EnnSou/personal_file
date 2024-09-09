@@ -97,6 +97,12 @@ for idx, node in enumerate(shape_info.graph.value_info):
     value_info_protos.append(node)
 graph.output.extend(value_info_protos) 
 
+### 添加模型 input 为 output
+value_info_protos = []
+for input_data in graph.input:
+    value_info_protos.append(input_data)
+graph.output.extend(value_info_protos)
+
 ## 生成新模型，完成shape检查
 new_graph = onnx.helper.make_graph(graph.node, graph.name, graph.input, graph.output, graph.initializer)
 new_model = onnx.helper.make_model(new_graph)
